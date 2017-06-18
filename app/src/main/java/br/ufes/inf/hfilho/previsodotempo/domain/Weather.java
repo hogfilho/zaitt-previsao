@@ -57,6 +57,10 @@ public class Weather implements Serializable {
         return mpsVento;
     }
 
+    public double getKmhVento(){
+        return mpsVento*3.6;
+    }
+
     public void setMpsVento(double mpsVento) {
         this.mpsVento = mpsVento;
     }

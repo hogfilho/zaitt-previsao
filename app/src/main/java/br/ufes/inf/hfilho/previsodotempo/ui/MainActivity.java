@@ -4,17 +4,26 @@ import android.Manifest;
 import android.accounts.NetworkErrorException;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Network;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -33,19 +42,19 @@ public class MainActivity extends AppCompatActivity {
     Thread t_update;
     ProgressDialog pd;
 
-
     private static final int MY_PERMISSIONS_GPS = 0;
+    private static final int REQUEST_CODE_CONFIG = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        updateData();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        updateData();
     }
 
 
@@ -63,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            Date lastUpdate = (Date)PreferenciasController.getObject(MainActivity.this,"LastUpdated");
                             TextView t_cidade_pais = (TextView) findViewById(R.id.t_cidade_pais);
                             TextView t_clima = (TextView) findViewById(R.id.t_clima);
                             TextView t_temp = (TextView) findViewById(R.id.t_temp);
@@ -73,26 +83,26 @@ public class MainActivity extends AppCompatActivity {
 
                             t_cidade_pais.setText(today.getCidade() + ", " + today.getPais());
                             t_clima.setText(today.getClima());
-                            t_temp.setText(today.getTemp(unidade)+ "º" + (unidade==Weather.TEMP_CELSIUS?"C":"F"));
+                            t_temp.setText(String.format("%.1f",today.getTemp(unidade))+ "º" + (unidade==Weather.TEMP_CELSIUS?"C":"F"));
 
                             l_dias.removeAllViews();
 
                             Calendar calendar = Calendar.getInstance();
+                            calendar.setTime(lastUpdate);
                             int day = calendar.get(Calendar.DAY_OF_WEEK);
                             int startIndex = day-1;
                             String dia = dias[startIndex];
-                            addDia(l_dias,dia,today.getMinTemp(unidade),today.getMaxTemp(unidade));
+                            addDia(l_dias,dia,today.getIcone(),today.getMinTemp(unidade),today.getMaxTemp(unidade),0);
 
-                            startIndex++;
                             int count=0;
                             for(Weather currDay:nextDays){
                                 int index = (startIndex+1+count) % 7;
                                 dia = dias[index];
-                                addDia(l_dias,dia,currDay.getMinTemp(unidade),currDay.getMaxTemp(unidade));
+                                addDia(l_dias,dia,currDay.getIcone(),currDay.getMinTemp(unidade),currDay.getMaxTemp(unidade),1+count);
                                 count++;
                             }
 
-                            Date lastUpdate = (Date)PreferenciasController.getObject(MainActivity.this,"LastUpdated");
+
                             SimpleDateFormat sdfDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
                             String strDate = sdfDate.format(lastUpdate);
                             t_last_update.setText("Atualizado em " + strDate);
@@ -102,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
                 } catch(IOException e){
                     showError("Rede Offline","Você precisa estar conectado na primeira utilização!");
                 } catch(NetworkErrorException e){
+                    e.printStackTrace();
                     requestGPSPermission();
                 }
                 pd.dismiss();
@@ -115,14 +126,31 @@ public class MainActivity extends AppCompatActivity {
         pd.show();
     }
 
-    private void addDia(ViewGroup root, String dia, double min, double max){
+    private void addDia(ViewGroup root, final String dia, String icone, double min, double max, int id){
         View v = LayoutInflater.from(this).inflate(R.layout.include_dia,root,false);
+        v.setId(id);
         TextView t_dia = (TextView) v.findViewById(R.id.t_dia);
         TextView t_max = (TextView) v.findViewById(R.id.t_max);
         TextView t_min = (TextView) v.findViewById(R.id.t_min);
+        ImageView i_icone = (ImageView) v.findViewById(R.id.i_icone);
+
         t_dia.setText(dia);
         t_min.setText(String.valueOf((int)min));
         t_max.setText(String.valueOf((int)max));
+        v.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(MainActivity.this,TempDetailsActivity.class);
+                i.putExtra("id",view.getId());
+                i.putExtra("dia",dia);
+                startActivity(i);
+            }
+        });
+
+        Glide.with(MainActivity.this)
+                .load("http://openweathermap.org/img/w/"+icone+".png")
+                .into(i_icone);
+
         root.addView(v);
     }
 
@@ -154,15 +182,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void requestGPSPermission(){
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ActivityCompat.requestPermissions(MainActivity.this,
-                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                        MY_PERMISSIONS_GPS);
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ActivityCompat.requestPermissions(MainActivity.this,
+                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                            MY_PERMISSIONS_GPS);
 
-            }
-        });
+                }
+            });
+        }
     }
 
     @Override
@@ -174,16 +204,47 @@ public class MainActivity extends AppCompatActivity {
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     updateData();
                 } else {
-                    showError("Permissão","Você precisa conceder permissão para acessar o GPS!", new DialogInterface.OnClickListener(){
-                        public void onClick(DialogInterface di, int i){
-                            //requestGPSPermission();
+                    //caso o usuario tenha negado, vai automaticamente pedir de novo no onResume
+                    showError("Permissão", "Você precisa conceder permissão para acessar o GPS!", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            requestGPSPermission();
                         }
                     });
                 }
-                return;
             }
 
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch(requestCode){
+            case REQUEST_CODE_CONFIG:
+                updateData();
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.principal, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                Intent i = new Intent(MainActivity.this,ConfigActivity.class);
+                startActivityForResult(i,REQUEST_CODE_CONFIG);
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
 }

@@ -21,8 +21,8 @@ import br.ufes.inf.hfilho.previsodotempo.domain.Weather;
 
 public class WeatherController {
     private static String appID = "e7c8fc5e73f563a33fc3d3bcf59a6a8b";
-    private static final int TYPE_CITY = 0;
-    private static final int TYPE_LATLON = 1;
+    public static final int TYPE_CITY = 0;
+    public static final int TYPE_LATLON = 1;
 
     @SuppressWarnings("unchecked")
     public static Weather getToday(Activity c) throws IOException, NetworkErrorException{
@@ -323,13 +323,19 @@ public class WeatherController {
                     kelvinTempMax=d.getKelvinTempMax();
                 }
             }
-            Weather media = day.get(0);
-            media.setPercentHumid(percentHumidSum/day.size());
-            media.setMpsVento(mpsVentoSum/day.size());
-            media.setKelvinTempMax(kelvinTempMax);
-            media.setKelvinTemp(kelvinTempSum/day.size());
-            media.setKelvinTempMin(kelvinTempMin);
-            ret.add(media);
+            if(day.size()>0) {
+                int i = (day.size() / 2);
+                if(i>=day.size()){
+                    i--;
+                }
+                Weather media = day.get(i);
+                media.setPercentHumid(percentHumidSum / day.size());
+                media.setMpsVento(mpsVentoSum / day.size());
+                media.setKelvinTempMax(kelvinTempMax);
+                media.setKelvinTemp(kelvinTempSum / day.size());
+                media.setKelvinTempMin(kelvinTempMin);
+                ret.add(media);
+            }
         }
 
         return ret;

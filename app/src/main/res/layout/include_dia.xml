@@ -1,37 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
-    android:layout_height="48dp"
-    android:background="#bfccae"
-    android:gravity="center_vertical"
-    android:layout_margin="8dp"
-    android:paddingLeft="36dp"
-    android:paddingRight="36dp"
-    android:weightSum="1">
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground">
 
-    <TextView
-        android:text="Domingo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/t_dia"
-        android:layout_weight="1"
-        android:textSize="18sp"
-        />
+    <LinearLayout
+        android:orientation="horizontal"
+        android:background="#bfccae"
+        android:gravity="center_vertical"
+        android:layout_margin="8dp"
+        android:paddingLeft="36dp"
+        android:paddingRight="36dp"
+        android:weightSum="1"
+        android:layout_width="match_parent"
+        android:layout_height="48dp">
+        <TextView
+            android:text="Domingo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/t_dia"
+            android:layout_weight="1"
+            android:textSize="18sp"
+            />
 
-    <TextView
-        android:text="24"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/t_min"
-        android:layout_marginRight="18dp"
-        android:textSize="16sp"
-        android:layout_weight="0" />
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:id="@+id/i_icone"
+            android:layout_marginRight="18dp"
+            android:textSize="16sp"
+            android:layout_weight="0" />
+        <TextView
+            android:text="24"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/t_min"
+            android:layout_marginRight="18dp"
+            android:textSize="16sp"
+            android:layout_weight="0" />
 
-    <TextView
-        android:text="20"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/t_max"
-        android:textSize="16sp"
-        android:layout_weight="0" />
+        <TextView
+            android:text="20"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/t_max"
+            android:textSize="16sp"
+            android:layout_weight="0" />
+
+    </LinearLayout>
+
 </LinearLayout>
