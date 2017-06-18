@@ -1,21 +1,17 @@
 package br.ufes.inf.hfilho.previsodotempo.ui;
 
-import android.accounts.NetworkErrorException;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.ImageViewTarget;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import br.ufes.inf.hfilho.previsodotempo.R;
 import br.ufes.inf.hfilho.previsodotempo.controller.PreferenciasController;
-import br.ufes.inf.hfilho.previsodotempo.controller.WeatherController;
 import br.ufes.inf.hfilho.previsodotempo.domain.Weather;
 
 public class TempDetailsActivity extends AppCompatActivity {
