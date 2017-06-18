@@ -3,7 +3,7 @@ Repositório do App Previsao de Tempo solicitado como teste pela Zaitt
 
 # Arquitetura
 Foi utilizada a arquitetura MVC(Model, View, Controller), onde a Interface Gráfica fica totalmente independente da lógica de negócio.
-Descrição dos pacotes br.ufes.inf.hfilho.previsotempo:<BR>
+Descrição dos pacotes br.ufes.inf.hfilho.previsodotempo:
 
 .controller - Camada do controlador
 
